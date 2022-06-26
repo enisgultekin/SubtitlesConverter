@@ -1,0 +1,35 @@
+﻿I will start filling the missing types and compiler will be of great help in that effort, as always.
+Static class named partitionings will be the first one to add. Its sole purpose is to expose a convenient factory function which creates some generic partitionings class:
+This reveals the next missing element, the generic class which will hold all the possible partitionings of a sequence:
+The duty of this class is to return all partitionings. Good. The All method will return a sequence of partitioning objects.
+Partitioning will be a sequence of partition objects, as I have already said before. Then, in the best tradition of iterative development, I want to make this All method return a meaningful result, but still the result which doesn’t affect existing features in my application.
+After a minute of thinking, I have figured out that if I returned exactly one partitioning…
+… and every partition inside of it consisted of only one element of the original sequence…
+… then this would literally mean that I haven’t partitioned anything, but only returned the input sequence wrapped into partition objects.
+Through the entire course I have paid close attention to develop all features in this way. Add a placeholder for the new functionality, and then fill it with code which supports the rest of the application in its current form.
+Do not declare and implement new features at the same time. That would be very complicated at times, and developing complicated code is often coupled with introducing defects.
+Save yourself from bugs by providing an empty, trivial implementation of all new features first.
+Only when you see that the new feature placeholder is working well, which means that the application is working the same as before, only then jump in and implement the full-blown feature.
+So, the next missing element in the new design is the Partitioning generic class:
+Partitioning is just a thin wrapper around a sequence of partition objects. With this, I have completed the task of giving names to all data structures I need.
+I will move all the new classes to their own files, and also move them to the Common namespace.
+Now I’m back in the domain class, ExpressionStream, and I have to implement this Multiply method.
+At this point I know that all partitions will be non-empty. I know it because that is the duty of the partitioning classes to guarantee. There you see why it’s a good idea to delegate responsibilities to other classes.
+And now that I know that the expressions sequence contains at least one expression, I can re-use the same idea as with additive expressions and repeat it with multiplication.
+You guess already that I am preparing ground for the third argument here, the one which will represent division in arithmetic expressions I’m generating. That feature is yet to come.
+Right now, I need an extension method which would construct expression trees solely consisting of multiplication nodes.
+Here is the implementation. It is exactly the same as with addition and subtraction operations, only it constructs the nodes of some nonexistent Multiply type.
+Let’s add that class to the system and this feature will be complete.
+Multiplication is just another binary operation. This class was very easy to write.
+And with this last change, I observe that the application compiles fine. Does it work fine?
+Empty line is ignored.
+A single number produces a trivial expression.
+Two numbers produce addition and subtraction expressions. This is good, that is precisely what the application was doing before.
+Three numbers are also producing all kinds of addition and subtraction expressions.
+Not a trace of multiplication. But that is good, because I haven’t been grouping numbers into groups that should be multiplied.
+I have merely added a placeholder for that feature.
+This is the placeholder for the new feature.
+My next task is to implement data partitioning. It will be another non-trivial task. But I know that I will succeed once I start implementing it, because that whole feature is enclosed in only one method.
+Every feature in my design is starting from exactly one entry point and then it delegates where appropriate and combines the results.
+Problem decomposition is the name for that practice, and it has served me well through the entire course.
+I am sure that I will be able to decompose this partitioning problem into smaller subproblems and solve them easily one after another. Keep watching.
