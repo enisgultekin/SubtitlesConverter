@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace SubtitlesConverter.Domain.TextProcessing
+﻿namespace Domain.TextProcessing.Implementation
 {
-    class LinesTrimmer : ITextProcessor
+    public class LinesTrimmer : ITextProcessor
     {
         public IEnumerable<string> Execute(IEnumerable<string> text) =>
             text

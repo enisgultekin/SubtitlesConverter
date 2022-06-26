@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using SubtitlesConverter.Common;
+﻿using System.Text.RegularExpressions;
+using Common;
 
-namespace SubtitlesConverter.Domain.TextProcessing
+namespace Domain.TextProcessing.Implementation
 {
-    class SentencesBreaker : ITextProcessor
+    public class SentencesBreaker : ITextProcessor
     {
         private IEnumerable<(string pattern, string extract, string remove)> Rules { get; } = new[]
         {
@@ -18,7 +16,7 @@ namespace SubtitlesConverter.Domain.TextProcessing
         };
 
         public IEnumerable<string> Execute(IEnumerable<string> text) =>
-            text.SelectMany(this.BreakSentences);
+            text.SelectMany(BreakSentences);
 
         private IEnumerable<string> BreakSentences(string text)
         {

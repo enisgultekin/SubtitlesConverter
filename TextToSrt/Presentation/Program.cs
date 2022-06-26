@@ -2,7 +2,10 @@
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using SubtitlesConverter.Domain;
+using Domain;
+using Domain.Models;
+using Domain.TextProcessing.Implementation;
+using Infrastructure.FileSystem;
 
 namespace SubtitlesConverter.Presentation
 {
@@ -10,28 +13,32 @@ namespace SubtitlesConverter.Presentation
     {
         private static string ToolName => Assembly.GetExecutingAssembly().GetName().Name;
 
-        private static string UsageText => $"{ToolName} <source file>.txt <output file>.srt <clip duration: [hh:]mm:ss[.fff]>";
+        private static string UsageText =>
+            $"{ToolName} <source file>.txt <output file>.srt";
 
         static void ShowUsage() => Console.WriteLine(UsageText);
 
         static bool Verify(string[] args)
         {
-            if (args.Length == 3)
+            if (args.Length == 2)
             {
-                return File.Exists(args[0]) &&
-                       Regex.IsMatch(args[2], @"\d+:[0-5][0-9]:[0-5][0-9](\.\d+)?");
+                return File.Exists(args[0]);
             }
 
             return false;
         }
-        
-        static void Process(FileInfo source, FileInfo destination, TimeSpan clipDuration)
+
+        static void Process(FileInfo source, FileInfo destination)
         {
             try
             {
-                string[] text = File.ReadAllLines(source.FullName);
-                Subtitles subtitles = Subtitles.Parse(text, clipDuration);
-                subtitles.SaveAsSrt(destination);
+                Subtitles subtitles = new SubtitlesBuilder()
+                    .For(new TextFileReader(source))
+                    .Using(new LinesTrimmer())
+                    .Using(new SentencesBreaker())
+                    .Using(new LinesBreaker(95, 45))
+                    .Build();
+                subtitles.SaveAsSrt(new TextFileWriter(destination));
             }
             catch (Exception ex)
             {
@@ -42,7 +49,7 @@ namespace SubtitlesConverter.Presentation
         static void Main(string[] args)
         {
             if (Verify(args))
-                Process(new FileInfo(args[0]), new FileInfo(args[1]), TimeSpan.Parse(args[2]));
+                Process(new FileInfo(args[0]), new FileInfo(args[1]));
             else
                 ShowUsage();
         }

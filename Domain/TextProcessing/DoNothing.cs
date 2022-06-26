@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SubtitlesConverter.Domain.TextProcessing
+﻿namespace Domain.TextProcessing
 {
     class DoNothing : ITextProcessor
     {

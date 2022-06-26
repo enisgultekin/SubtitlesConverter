@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace SubtitlesConverter.Common
+﻿namespace Common
 {
     public static class EnumerableExtensions
     {
