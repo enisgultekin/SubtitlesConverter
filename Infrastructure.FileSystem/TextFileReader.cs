@@ -7,13 +7,14 @@ namespace Infrastructure.FileSystem;
 
 public class TextFileReader : ITextReader
 {
-    public TimedText Read() => ParseSource();
     private FileInfo Source { get; }
     
     public TextFileReader(FileInfo source)
     {
         Source = source;
     }
+    
+    public TimedText Read() => ParseSource();
     
     private TimedText ParseSource()
     {

@@ -40,7 +40,7 @@ namespace Domain.TextProcessing.Implementation
         };
 
         public IEnumerable<string> Execute(IEnumerable<string> text) =>
-            text.SelectMany(line => this.BreakLongLine(line));
+            text.SelectMany(BreakLongLine);
 
         public IEnumerable<string> BreakLongLine(string line)
         {
@@ -55,10 +55,10 @@ namespace Domain.TextProcessing.Implementation
                 }
 
                 bool broken = false;
-                foreach ((string separator, string toLeft, string toRight)[] rules in this.Rules)
+                foreach ((string separator, string toLeft, string toRight)[] rules in Rules)
                 {
                     IEnumerable<(string left, string right)> split =
-                        this.TryBreakLongLine(remaining, rules)
+                        TryBreakLongLine(remaining, rules)
                             .ToList();
 
                     if (split.Any())
@@ -82,7 +82,7 @@ namespace Domain.TextProcessing.Implementation
         private IEnumerable<(string left, string right)> TryBreakLongLine(
             string line, 
             IEnumerable<(string separatorPattern, string appendLeft, string prependRight)> rules) =>
-            rules.SelectMany(rule => this.BreakLongLine(line, rule))
+            rules.SelectMany(rule => BreakLongLine(line, rule))
                 .WithMinimumOrEmpty(split => MaxLineLength - split.left.Length);
 
         private IEnumerable<(string left, string right)> BreakLongLine(

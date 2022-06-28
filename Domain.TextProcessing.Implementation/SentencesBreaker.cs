@@ -1,61 +1,18 @@
-﻿using System.Text.RegularExpressions;
-using Common;
-
-namespace Domain.TextProcessing.Implementation
+﻿namespace Domain.TextProcessing.Implementation
 {
-    public class SentencesBreaker : ITextProcessor
+    public class SentencesBreaker : RuleBasedProcessor
     {
-        private IEnumerable<(string pattern, string extract, string remove)> Rules { get; } = new[]
-        {
-            (@"^(?<remove>(?<extract>(\.\.\.|[^\.])+)\.)$", "${extract}", "${remove}"),
-            (@"^(?<remove>(?<extract>[^\.]+),)$", "${extract}", "${remove}"),
-            (@"^(?<remove>(?<extract>(\.\.\.|[^\.])+)\.)[^\.].*$", "${extract}", "${remove}"),
-            (@"^(?<remove>(?<extract>[^:]+):).*$", "${extract}", "${remove}"),
-            (@"^(?<extract>.+\?).*$", "${extract}", "${extract}"),
-            (@"^(?<extract>.+\!).*$", "${extract}", "${extract}"),
-        };
-
-        public IEnumerable<string> Execute(IEnumerable<string> text) =>
-            text.SelectMany(BreakSentences);
-
-        private IEnumerable<string> BreakSentences(string text)
-        {
-            string remaining = text.Trim();
-            while (remaining.Length > 0)
+        protected override IMultiwaySplitter Splitter { get; } = new[]
             {
-                (string extracted, string rest) =
-                    this.FindShortestExtractionRule(this.Rules, remaining)
-                        .Select(tuple => (
-                            extracted: tuple.extracted,
-                            removedLength: tuple.remove.Length))
-                        .Select(tuple => (
-                            extracted: tuple.extracted,
-                            remaining: remaining.Substring(tuple.removedLength).Trim()))
-                        .DefaultIfEmpty((extracted: remaining, remaining: string.Empty))
-                        .First();
-
-                yield return extracted;
-                remaining = rest;
+                RegexSplitter.LeftAndRightExtractor(@"^(?<left> [^\?*]+\?)\s*(?<right>.*)$"),
+                RegexSplitter.LeftAndRightExtractor(@"^(?<left>[^\!*]+\!)\s*(?<right>.*)$"),
+                RegexSplitter.LeftAndRightExtractor(@"^(?<left>(?:(?:\.\.\.)|[^\.])+)\.\s*(?<right>.*)$"),
+                RegexSplitter.LeftAndRightExtractor(
+                    @"(?<left>^.\*\.\.\.)(?=(?:\s+\p{Lu})|(?:\s+\p{Lt})|\s*$)\s*(?<right>.*)$"),
+                RegexSplitter.LeftExtractor(@"^(?<left>.*(?<!\.))\.(?=$)(?<right>)$"),
+                RegexSplitter.LeftExtractor(@"^(?<left>.*)(?:[\:\;\,]||s+-\s*)(?<right>)$"),
             }
-        }
-
-        private IEnumerable<(string extracted, string remove)> FindShortestExtractionRule(
-            IEnumerable<(string pattern, string extractPattern, string removePattern)> rules,
-            string text) =>
-            rules
-                .Select(rule => (
-                    pattern: new Regex(rule.pattern),
-                    extractPattern: rule.extractPattern,
-                    removePattern: rule.removePattern))
-                .Select(rule => (
-                    pattern: rule.pattern,
-                    match: rule.pattern.Match(text),
-                    extractPattern: rule.extractPattern,
-                    removePattern: rule.removePattern))
-                .Where(rule => rule.match.Success)
-                .Select(rule => (
-                    extracted: rule.pattern.Replace(text, rule.extractPattern),
-                    remove: rule.pattern.Replace(text, rule.removePattern)))
-                .WithMinimumOrEmpty(tuple => tuple.remove.Length);
+            .WithShortestLeft()
+            .Repeat();
     }
 }
